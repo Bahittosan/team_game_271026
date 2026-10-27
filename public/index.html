@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="kk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0c1425">
+  <meta name="description" content="Оқыту үдерісі тұтас жүйе ретінде: 20 минуттық командалық интерактивті ойын">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="shortcut icon" href="/favicon.ico">
+  <title>Педагогикалық миссия — командалық ойын (v3)</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b1323; --bg2:#121e33; --surface:#17243a; --surface2:#1e2e48; --stroke:#314059; --text:#f2f5fc; --muted:#a7b6cb; --gold:#ffc979; --mint:#8ee3c8; --coral:#ff9c86; --red:#ffb0ac; --blue:#9cbdff; --shadow:0 20px 60px rgba(0,0,0,.20); }
+    * { box-sizing:border-box; }
+    html {scroll-behavior:smooth;}
+    body {margin:0; font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;background:radial-gradient(ellipse 850px 600px at 80% -20%,#263b60 0%,transparent 70%),radial-gradient(ellipse 700px 550px at -20% 55%,#123342 0%,transparent 65%),var(--bg);color:var(--text);min-height:100vh;}
+    button {font:inherit;cursor:pointer;} button:disabled {cursor:not-allowed;opacity:.48;} button:focus-visible {outline:3px solid var(--gold);outline-offset:4px;}
+    .shell {max-width:1250px;margin:0 auto;padding:24px 36px 42px;}
+    .topbar {display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid rgba(168,185,208,.18);}
+    .brand {display:flex;align-items:center;gap:13px;}
+    .brand-icon {width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:var(--gold);color:#18243b;font-size:27px;font-weight:950;transform:rotate(-6deg);}
+    .brand h1 {font-size:15px;letter-spacing:.11em;margin:0;font-weight:850;} .brand p {margin:3px 0 0;font-size:12px;color:var(--muted);}
+    .top-actions {display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+    .timer {display:flex;gap:9px;align-items:center;background:#111f34;border:1px solid var(--stroke);border-radius:13px;padding:7px 10px 7px 14px;}
+    .timer-label {font-size:10px;font-weight:800;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+    .clock {font-size:21px;letter-spacing:.045em;font-weight:850;font-variant-numeric:tabular-nums;min-width:70px;} .clock.urgent {color:var(--coral);}
+    .mini-btn {color:var(--text);background:#22334f;border:1px solid #3a4f6c;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:800;} .mini-btn:hover {background:#2f4361;}
+    .plain-link {border:0;background:none;color:var(--muted);font-size:12px;text-decoration:underline;text-underline-offset:3px;padding:10px 4px;}
+    .scorebar {display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:19px 0 24px;}
+    .team {border:1px solid var(--stroke);background:linear-gradient(145deg,#18283e,#101b30);border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;min-width:0;}
+    .team .orb {width:39px;height:39px;border-radius:12px;display:grid;place-items:center;color:#102032;font-weight:950;flex-shrink:0;}
+    .team[data-i="0"] .orb {background:var(--gold)}.team[data-i="1"] .orb{background:var(--mint)}.team[data-i="2"] .orb{background:var(--coral)}
+    .team-text {min-width:0;flex:1}.team-name {font-size:13px;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.team-points {font-size:24px;line-height:1.1;font-weight:900;font-variant-numeric:tabular-nums;}.team-points span{font-size:11px;font-weight:650;color:var(--muted)}
+    .progress-wrap {display:flex;gap:6px;align-items:center;margin-bottom:22px;}.progress-segment{height:5px;flex:1;border-radius:8px;background:#2a3951;transition:background .2s;}.progress-segment.done{background:var(--mint)}.progress-segment.current{background:var(--gold)}
+    .stage {position:relative;overflow:hidden;border:1px solid rgba(140,168,207,.25);border-radius:27px;background:linear-gradient(150deg,rgba(29,44,68,.97),rgba(14,26,44,.99));box-shadow:var(--shadow);min-height:510px;padding:34px;}
+    .stage:before {content:"";position:absolute;right:-115px;top:-130px;width:310px;height:310px;border-radius:50%;border:1px solid rgba(255,201,121,.12);box-shadow:0 0 0 50px rgba(255,201,121,.028),0 0 0 100px rgba(255,201,121,.02);pointer-events:none;}
+    .stage > *{position:relative;} .eyebrow{color:var(--gold);font-size:12px;font-weight:850;letter-spacing:.15em;text-transform:uppercase;display:flex;align-items:center;gap:9px;margin-bottom:14px;}.eyebrow:before{content:"";width:22px;height:2px;background:var(--gold);}
+    h2 {margin:0 0 10px;font-weight:900;letter-spacing:-.045em;font-size:clamp(30px,4vw,53px);line-height:1.10;max-width:930px;}h2 em{font-style:normal;color:var(--gold)}
+    .lead{color:#b9c9de;font-size:16px;line-height:1.65;max-width:830px;margin:0 0 25px;}
+    .kicker {color:var(--muted);font-size:13px;font-weight:750;margin:0 0 7px}.muted{color:var(--muted)}
+    .card {background:linear-gradient(150deg,rgba(33,48,72,.88),rgba(22,35,55,.92));border:1px solid #3a4a63;border-radius:16px;padding:18px;}
+    .case {background:linear-gradient(135deg,#24324a,#1a2b42);border:1px solid #526078;border-left:4px solid var(--gold);border-radius:15px;padding:21px 24px;max-width:940px;line-height:1.7;color:#e2eaf7;font-size:16px;}
+    .steps {display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:22px 0 27px;} .step {background:rgba(13,25,44,.72);border:1px solid var(--stroke);padding:15px;border-radius:14px;} .step-no{color:var(--gold);font-size:12px;font-weight:850}.step-label{margin-top:5px;font-size:14px;font-weight:750}.step-time{margin-top:4px;font-size:12px;color:var(--muted)}
+    .mission-list {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin-top:22px;}
+    .task {display:flex;flex-direction:column;gap:11px;min-width:0;}.task-head{display:flex;align-items:center;justify-content:space-between;gap:6px;}.team-chip{font-size:11px;font-weight:850;padding:6px 10px;color:#0c1e32;background:var(--gold);border-radius:30px;}.task[data-team="1"] .team-chip{background:var(--mint)}.task[data-team="2"] .team-chip{background:var(--coral)}
+    .task p{font-size:14px;line-height:1.6;color:#e3eaf5;margin:0;min-height:72px;}.question{font-weight:830;font-size:13px;color:white;}
+    .answers{display:grid;gap:7px;}.answer{width:100%;background:#101d31;color:#dbe6f4;border:1px solid #384b65;border-radius:10px;text-align:left;padding:11px 12px;font-size:13px;line-height:1.35;transition:transform .12s,background .12s;}.answer:not(:disabled):hover{background:#253954;transform:translateY(-1px)}.answer:disabled{opacity:1;cursor:default}.answer.selected{background:rgba(255,201,121,.12);border-color:var(--gold);color:#fff}.answer.correct{background:rgba(142,227,200,.12);border-color:var(--mint)}.answer.incorrect{background:rgba(255,156,134,.09);border-color:var(--coral)}
+    .result{font-size:12px;line-height:1.5;border-radius:10px;padding:11px 12px;margin-top:auto;}.result.good{color:#b4f8df;background:rgba(35,117,96,.19);border:1px solid rgba(142,227,200,.28)} .result.bad{color:#ffd3c9;background:rgba(173,81,77,.14);border:1px solid rgba(255,156,134,.28)}
+    .action{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid #ffdca5;border-radius:11px;background:var(--gold);color:#192339;font-size:14px;font-weight:850;padding:13px 20px;min-height:47px;box-shadow:0 4px 0 rgba(0,0,0,.10);}.action:hover:not(:disabled){background:#ffdb9f;}.action.secondary{background:#263a56;border-color:#4a607f;color:#eff5ff;box-shadow:none}.action.secondary:hover:not(:disabled){background:#304865}.action.ghost{background:transparent;color:#d0dded;border-color:#3a506d;box-shadow:none}.action.ghost:hover:not(:disabled){background:#1d324f}.action.small{padding:8px 12px;font-size:12px;min-height:36px}
+    .stage-actions{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:22px;}.stage-actions .right{display:flex;gap:8px;flex-wrap:wrap}.tiny-note{font-size:12px;color:var(--muted);line-height:1.55}
+    .puzzle-wrap{display:grid;grid-template-columns: minmax(0,1fr) minmax(0,1fr);gap:18px;margin-top:20px;}.puzzle-panel{background:#111f33;border:1px solid #334764;border-radius:16px;padding:17px;}.puzzle-panel h3{font-size:15px;margin:0 0 14px}.tokens{display:flex;gap:8px;flex-wrap:wrap;min-height:180px;align-content:flex-start}.token{border-radius:11px;border:1px solid #4b6380;background:#223954;color:#edf3ff;padding:10px 12px;font-size:13px;font-weight:750;min-height:39px;}.token:hover{background:#304b6b;}.slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;}.slot{min-height:48px;display:flex;align-items:center;justify-content:flex-start;gap:8px;color:#dce8fa;border:1px dashed #61718d;background:#1b2b43;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:750;text-align:left}.slot.filled{border-style:solid;border-color:#7589a7;background:#29405f}.slot b{font-size:11px;color:var(--gold);min-width:13px}.slot:hover{background:#30415a}
+    .notice{padding:13px 16px;border:1px solid #49627e;background:#183049;border-radius:12px;color:#cde7f6;font-size:13px;margin:17px 0 0;line-height:1.6;}
+    .notice.error{border:2px solid #ff7779;background:#512332;color:#ffe1e0;font-weight:750;}
+    .notice.success{border:2px solid var(--mint);background:#123e39;color:#d4ffed;font-weight:750;}
+    .slot.right{border:2px solid #82efbe;background:#124b3c;color:#e4fff1;}
+    .slot.wrong{border:2px solid #ff747b;background:#602b38;color:#fff1f1;}
+    .slot .mark{margin-left:auto;font-size:18px;font-weight:900;}
+    .slot.right .mark{color:#90ffd0;}.slot.wrong .mark{color:#ffb7bc;}
+    .team[data-active="true"]{outline:2px solid var(--gold);outline-offset:2px;box-shadow:0 0 0 5px rgba(255,201,121,.08);}
+    .round-team-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;background:#2f324b;border:2px solid var(--gold);padding:15px 19px;border-radius:15px;margin:8px 0 15px;}
+    .round-team-banner strong{font-size:19px;color:#fff;}.round-team-banner span{font-size:12px;color:#f7ddb1;font-weight:800;}
+    .team-progress{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;}
+    .team-progress .team-status{border-radius:12px;border:1px solid #3c5071;background:#18283e;padding:12px 14px;color:#b8c9df;min-width:0;}
+    .team-progress .team-status.active{border:2px solid var(--gold);background:#41372e;color:#ffebc8;}
+    .team-progress .team-status.finished{border-color:#3c5071;color:#dce8fa;}
+    .team-progress .team-status.passed{border:2px solid #82efbe;background:#123e39;color:#d4ffed;}
+    .team-progress .team-status.failed{border:2px solid #ff747b;background:#502736;color:#ffe1e0;}
+    .round-overview .card.passed{border:2px solid #82efbe;background:#153e38;}
+    .round-overview .card.failed{border:2px solid #ff747b;background:#432631;}
+    .round-overview .card.passed .big-points{color:#82efbe;}
+    .round-overview .card.failed .big-points{color:#ffb7bc;}
+    .round-overview .round-outcome{font-size:13px;font-weight:850;margin-top:10px;line-height:1.45;}
+    .round-overview .round-detail{font-size:12px;color:#d6dfe9;margin-top:6px;line-height:1.5;}
+    .round-overview .card.failed .round-outcome{color:#ffd3d5;}
+    .round-overview .card.passed .round-outcome{color:#c0f7df;}
+    .team-status b{display:block;font-size:14px;margin-bottom:4px;}.team-status span{font-size:12px;}
+    .center-next{display:flex;justify-content:center;align-items:center;margin:25px auto 3px;}
+    .center-next .action{min-width:250px;font-size:15px;padding:17px 24px;}
+    .round-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px;}
+    .round-overview .card{text-align:center;}.round-overview .big-points{color:var(--gold);font-size:33px;font-weight:900;margin-top:9px;}
+    .puzzle-panel h3{line-height:1.4;}
+    .puzzle-hint{margin:12px 0 0;color:#afc8df;font-size:12px;line-height:1.55;}
+    @media(max-width:650px){.team-progress,.round-overview{grid-template-columns:1fr}.round-team-banner strong{font-size:16px}.center-next .action{width:100%;min-width:0}}
+    
+    .puzzle-controls{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0 0;align-items:center;}.bonus{display:inline-block;border-radius:20px;padding:7px 11px;font-size:12px;font-weight:750;background:#254d49;color:#a9efdb;}
+    .conclusion {display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:22px;} .podium{border:1px solid #435777;border-radius:17px;padding:25px 18px;text-align:center;background:#1b2c45}.podium.winner{border-color:var(--gold);background:linear-gradient(155deg,#3f3e3d,#243247)}.podium .rank{font-size:13px;letter-spacing:.12em;font-weight:900;color:var(--muted)}.podium .name{font-size:18px;font-weight:830;margin:10px 0}.podium .points{font-size:45px;font-weight:950;color:var(--gold)}
+    .takeaway{border-left:3px solid var(--mint);padding:15px 19px;margin-top:23px;background:rgba(142,227,200,.065);border-radius:0 12px 12px 0;color:#d6e8e4;line-height:1.65}
+    .footer{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;font-size:12px;color:#889db8;margin-top:19px}.footer span{max-width:900px}
+    .stamp{display:inline-block;border:1px solid #576d87;border-radius:999px;padding:7px 12px;font-size:12px;color:#c5d5e8;margin-bottom:16px}
+    @media(max-width:900px){.shell{padding:15px 16px 36px}.stage{padding:23px}.mission-list{grid-template-columns:1fr}.task p{min-height:unset}.steps{grid-template-columns:repeat(2,1fr)}.puzzle-wrap{grid-template-columns:1fr}.conclusion{grid-template-columns:1fr 1fr 1fr}.task{padding:17px}.scorebar{gap:7px}.team{padding:10px}.team .orb{width:32px;height:32px}.team-name{font-size:11px}}
+    @media(max-width:560px){.brand h1{font-size:12px}.topbar{align-items:flex-start}.scorebar{grid-template-columns:1fr 1fr 1fr}.team{display:block;text-align:center;padding:9px 3px}.team .orb{margin:0 auto 5px}.team-points{font-size:20px}.stage{padding:19px;border-radius:17px;min-height:initial}.steps{gap:7px}.step{padding:10px}.step-label{font-size:12px}.lead{font-size:14px}.case{font-size:14px;padding:15px}.slots{grid-template-columns:1fr}.conclusion{grid-template-columns:1fr}.stage-actions{display:block}.stage-actions .right{margin-top:8px}.stage-actions .action{width:100%}.stage-actions .right .action{flex:1}.top-actions{width:100%}.timer{flex:1}.footer{font-size:11px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar">
+    <div class="brand"><div class="brand-icon" aria-hidden="true">✳</div><div><h1>ПЕДАГОГИКАЛЫҚ МИССИЯ</h1><p>Оқыту үдерісі — тұтас жүйе</p></div></div>
+    <div class="top-actions"><div class="timer" aria-label="Ойын таймері"><div><div class="timer-label">Қалған уақыт</div><div class="clock" id="clock" aria-live="off">20:00</div></div><button class="mini-btn" id="timer-toggle" data-action="timer">Бастау</button><button class="mini-btn" data-action="timer-reset" title="Таймерді 20 минутқа қайтару">↺</button></div><button class="plain-link" data-action="restart">Ойынды қайта бастау ↺</button></div>
+  </header>
+  <section class="scorebar" id="scores" aria-label="Командалардың ұпайлары"></section>
+  <div class="progress-wrap" id="progress" aria-label="Ойын барысы"></div>
+  <main id="view" class="stage" aria-live="polite"></main>
+  <footer class="footer"><span>Оқу негізі: 8-дәріс «Оқыту үдерісі тұтас жүйе ретінде». Теория мен жағдаяттар оқу ойынына бейімделді.</span><span>Жүргізуші басқаратын ойын · 3 команда · 20 минут</span></footer>
+</div>
+<script>
+'use strict';
+const labels=['1-команда','2-команда','3-команда'];
+const order=['Мақсаты','Міндеттері','Мазмұны','Формасы','Құралдары','Әдіс-тәсілдері','Бақылау және бағалау','Нәтиже'];
+const shuffled=['Нәтиже','Мазмұны','Құралдары','Мақсаты','Бақылау және бағалау','Әдіс-тәсілдері','Міндеттері','Формасы'];
+const rounds={
+  one:[
+    {scene:'Оқытушы жаңа тақырыпты бастады, бірақ сабақ соңында студенттер қандай нәтижеге жетуі керегін айтпады.',prompt:'Не жетіспейді?',options:['Мақсаты','Құралдары','Формасы'],right:0,note:'Оқу мақсаты сабақтың күтілетін нәтижесін анықтайды.'},
+    {scene:'Студенттер 40 минут тек тыңдады. Тапсырма, талқылау немесе бірлескен жұмыс ұйымдастырылмады.',prompt:'Қай тұсты өзгерту қажет?',options:['Оқу мерзімі','Әдіс-тәсілдері','Аудитория көлемі'],right:1,note:'Белсенді әдістер студенттің оқу іс-әрекетін ұйымдастыруға көмектеседі.'},
+    {scene:'Сабақ аяқталды, бірақ студенттердің материалды қаншалықты меңгергені тексерілмеді.',prompt:'Қай компонент ескерілмеді?',options:['Бақылау және бағалау','Құралдары','Формасы'],right:0,note:'Бақылау мен бағалау мақсатқа жеткен-жетпегенімізді көрсетеді.'}
+  ],
+  three:[
+    {scene:'Оқытушы жаңа ұғымды түсіндіріп, оны мысалдармен көрсетеді.',prompt:'Бұл қай функция?',options:['Тәрбиелік','Білім берушілік','Дамытушылық'],right:1,note:'Білім берушілік функция білім мен ақпаратты меңгертеді.'},
+    {scene:'Студенттер деректерді салыстырады, дәлел келтіреді және өз шешімін негіздейді.',prompt:'Бұл қай функция?',options:['Дамытушылық','Тәрбиелік','Білім берушілік'],right:0,note:'Дамытушылық функция ойлау мен қабілеттерді дамытады.'},
+    {scene:'Топтық жоба кезінде студенттер жауапкершілік, әділдік және өзара құрмет қағидаларын ұстанады.',prompt:'Бұл қай функция?',options:['Дамытушылық','Білім берушілік','Тәрбиелік'],right:2,note:'Тәрбиелік функция әлеуметтік нормалар мен құндылықтарды қалыптастырады.'}
+  ],
+  four:[
+    {scene:'Педагог өз білгенін ғана айтып береді, студенттердің ерекшеліктерін есепке алмайды.',prompt:'Н.В. Кузьмина бойынша қай деңгей?',options:['I — репродуктивті','II — бейімделуші','III — жергілікті модельдеуші','IV — жүйелі модельдеуші (білім)','V — жүйелі модельдеуші (іс-әрекет)'],right:0,note:'I деңгейде оқытушы негізінен дайын ақпаратты қайта баяндайды.'},
+    {scene:'Педагог оқу материалын топтың дайындығы мен аудитория ерекшелігіне қарай бейімдейді.',prompt:'Н.В. Кузьмина бойынша қай деңгей?',options:['I — репродуктивті','II — бейімделуші','III — жергілікті модельдеуші','IV — жүйелі модельдеуші (білім)','V — жүйелі модельдеуші (іс-әрекет)'],right:1,note:'II деңгейдің басты белгісі — аудиторияға бейімделу.'},
+    {scene:'Педагог пәнді студенттің дербес оқуына, өзін-өзі тәрбиелеуіне және тұлғалық дамуына құрал етеді.',prompt:'Н.В. Кузьмина бойынша қай деңгей?',options:['I — репродуктивті','II — бейімделуші','III — жергілікті модельдеуші','IV — жүйелі модельдеуші (білім)','V — жүйелі модельдеуші (іс-әрекет)'],right:4,note:'V деңгейде пән студенттің іс-әрекеті мен тұлғалық дамуын жүйелі қалыптастыруға қызмет етеді.'}
+  ]
+};
+function newPuzzleTeam(){return {pick:[],attempts:0,result:null,solved:false,revealed:false,points:0};}
+function freshState(){return {step:0,points:[0,0,0],answers:{one:{},three:{},four:{}},checked:{one:{},three:{},four:{}},puzzleActive:0,puzzleTeams:Array.from({length:3},newPuzzleTeam),seconds:1200,running:false,started:false,justRestarted:false};}
+let state=freshState();
+const $=id=>document.getElementById(id);
+function esc(v){return String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');}
+function scoreBar(){ $('scores').innerHTML=labels.map((name,i)=>`<div class="team" data-i="${i}" data-active="${state.step===2&&state.puzzleActive===i}"><div class="orb">0${i+1}</div><div class="team-text"><div class="team-name">${name}</div><div class="team-points">${state.points[i]} <span>ұпай</span></div></div></div>`).join(''); }
+function progress(){ $('progress').innerHTML=Array.from({length:6},(_,i)=>`<div class="progress-segment ${state.step>i?'done':state.step===i?'current':''}" title="${i===0?'Кіріспе':i===5?'Қорытынды':i+'-кезең'}"></div>`).join('');}
+function renderTimer(){const m=Math.floor(state.seconds/60);const s=state.seconds%60;$('clock').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');$('clock').classList.toggle('urgent',state.seconds<=120);$('timer-toggle').textContent=state.running?'Үзіліс':state.started?'Жалғастыру':'Бастау';}
+function stageHead(n,name,title,lead,time){return `<div class="eyebrow">${n}-КЕЗЕҢ · ${esc(name)} · ${time} МИНУТ</div><h2>${title}</h2><p class="lead">${lead}</p>`;}
+function controls({prev=true,next=true,nextLabel='Келесі кезең →',nextDisabled=false}={}){return `<div class="stage-actions"><div>${prev?`<button class="action ghost" data-action="prev">← Артқа</button>`:''}</div><div class="right">${next?`<button class="action" data-action="next" ${nextDisabled?'disabled':''}>${nextLabel}</button>`:''}</div></div>`;}
+function intro(){return `${state.justRestarted?'<div class="notice" role="status">↺ Ойын қайта басталды. Барлық ұпайлар мен жауаптар тазартылды. Таймер: 20:00.</div>':''}<div class="eyebrow">8-ДӘРІС · ИНТЕРАКТИВТІ ОЙЫН</div><div class="stamp">◉ 3 КОМАНДА &nbsp;·&nbsp; 4 МИССИЯ &nbsp;·&nbsp; 20 МИНУТ</div><h2>Педагогикалық <em>үдерісті құтқар!</em></h2><p class="lead">Бүгін сендер — университеттің педагогикалық сарапшыларысыңдар. Мақсат: әлсіз сабақты нәтижелі, тұтас педагогикалық жүйеге айналдыру.</p><div class="case"><strong>Жағдаят:</strong> Университеттегі дәрісте оқытушы 40 минут бойы слайд оқиды. 15 студенттің екеуі ғана жауап береді. Сабақ мақсаты түсіндірілмейді, соңында білім тексерілмейді. <strong>Бұл сабақты қалай жақсартамыз?</strong></div><div class="steps"><div class="step"><div class="step-no">01 · 3 МИН</div><div class="step-label">Ақауды анықта</div><div class="step-time">3 жағдайды талдау</div></div><div class="step"><div class="step-no">02 · 5 МИН</div><div class="step-label">Жүйені құрастыр</div><div class="step-time">8 компонент</div></div><div class="step"><div class="step-no">03 · 5 МИН</div><div class="step-label">Үш функция</div><div class="step-time">Жағдайды жіктеу</div></div><div class="step"><div class="step-no">04 · 3 МИН</div><div class="step-label">Шеберлік деңгейі</div><div class="step-time">Педагогты бағалау</div></div></div><p class="tiny-note">Жүргізушіге: кіріспеге 2 минут, қорытындыға 2 минут қалдырыңыз. Әр тапсырмада тиісті команда 20–30 секунд ақылдасып, жауабын таңдайды.</p><div class="stage-actions"><div></div><div class="right"><button class="action secondary" data-action="timer">${state.running?'Уақытты тоқтату':state.started?'Уақытты жалғастыру':'20 минуттық таймерді бастау'}</button><button class="action" data-action="next">Бірінші миссия →</button></div></div>`;}
+function caseCards(key){return `<div class="mission-list">${rounds[key].map((q,i)=>{const chosen=state.answers[key][i];const checked=!!state.checked[key][i];return `<article class="card task" data-team="${i}"><div class="task-head"><span class="team-chip">${labels[i]}</span><span class="muted" style="font-size:12px">№ ${i+1}</span></div><p>${esc(q.scene)}</p><div class="question">${esc(q.prompt)}</div><div class="answers">${q.options.map((o,j)=>{let cls=chosen===j?'selected':'';if(checked&&q.right===j)cls+=' correct';if(checked&&chosen===j&&chosen!==q.right)cls+=' incorrect';return `<button class="answer ${cls}" data-action="select" data-key="${key}" data-i="${i}" data-option="${j}" ${checked?'disabled':''} aria-pressed="${chosen===j}">${esc(o)}</button>`;}).join('')}</div>${checked?`<div class="result ${chosen===q.right?'good':'bad'}">${chosen===q.right?'✓ Дұрыс! +2 ұпай.':'✕ Дұрыс жауап: '+esc(q.options[q.right])+'.'}<br>${esc(q.note)}</div>`:`<button class="action small secondary" data-action="check" data-key="${key}" data-i="${i}" ${chosen===undefined?'disabled':''}>Жауапты тексеру</button>`}</article>`;}).join('')}</div>`;}
+function one(){return stageHead('01','Талдау','<em>Ақауды анықта</em>','Әр команда өз жағдайын оқып, педагогикалық үдерістегі олқылықты табады. Дұрыс жауапқа — 2 ұпай.','3')+caseCards('one')+controls();}
+function puzzleOutcome(team){
+  if(team.points===2) return {cls:'passed',title:'✓ Дұрыс жауап',detail:'Бірінші талпыныс: +2 ұпай'};
+  if(team.revealed) return {cls:'failed',title:'✕ Жауап көрсетілді',detail:'Өзі дұрыс жинаған жоқ · 0 ұпай'};
+  if(team.solved) return {cls:'failed',title:'△ Кейін түзетілді',detail:'Алғашқы рет қате болды · 0 ұпай'};
+  if(team.attempts>0) return {cls:'failed',title:'✕ Қате жауап',detail:'Дұрыс рет табылмады · 0 ұпай'};
+  return {cls:'idle',title:'— Тексерілмеді',detail:'0 ұпай'};
+}
+function puzzleProgress(){return `<div class="team-progress" aria-label="Командалардың екінші кезеңдегі нәтижелері">${state.puzzleTeams.map((team,i)=>{
+  const active=state.puzzleActive===i;
+  const done=i<state.puzzleActive;
+  const outcome=puzzleOutcome(team);
+  const subtitle=done?`${outcome.title} · ${team.points} ұпай`:active?(team.attempts>0?`${outcome.title} · ${team.points} ұпай`:'Қазір орындап жатыр'):'Кезегін күтіп тұр';
+  return `<div class="team-status ${active?'active':done?`finished ${outcome.cls}`:''}"><b>${esc(labels[i])} ${active?'●':''}</b><span>${subtitle}</span></div>`;
+}).join('')}</div>`;}
+function two(){
+  const head=stageHead('02','Құрастыру','<em>Жүйені жина</em>','Әр команда 8 компонентті өз кезегімен орналастырады. Бірінші тексеруде толық дұрыс болса — 2 ұпай. Қате жауапқа ұпай берілмейді.','5');
+  if(state.puzzleActive>=3){
+    const correctCount=state.puzzleTeams.filter(team=>team.points===2).length;
+    const summary=correctCount===0
+      ? `<div class="notice error" role="status"><strong>✕ Екінші кезең аяқталды. Ешбір команда бірінші талпыныста дұрыс ретті таппады.</strong><div>Дұрыс жауап берген команда жоқ. Барлығына 0 ұпай берілді. «Аяқталды» тек кезектің біткенін білдіреді.</div></div>`
+      :correctCount===3
+      ? `<div class="notice success" role="status">✓ Екінші кезең аяқталды. Үш команда да дұрыс ретті бірінші талпыныста жинады: әр командаға +2 ұпай.</div>`
+      : `<div class="notice" role="status"><strong>Екінші кезең аяқталды.</strong> ${correctCount} команда бірінші талпыныста дұрыс орындады, ${3-correctCount} команда ұпай алмады. Нәтижелер төменде жеке көрсетілген.</div>`;
+    return head+puzzleProgress()+summary+
+    `<div class="round-overview">${state.puzzleTeams.map((team,i)=>{const result=puzzleOutcome(team);return `<div class="card ${result.cls}"><strong>${esc(labels[i])}</strong><div class="big-points">${team.points>0?'+2':'0'} <span style="font-size:14px">ұпай</span></div><div class="round-outcome">${result.title}</div><div class="round-detail">${result.detail}</div></div>`;}).join('')}</div>`+
+    `<div class="center-next"><button class="action" data-action="next">Келесі кезеңге өту →</button></div>`+
+    `<div class="stage-actions"><button class="action ghost" data-action="prev">← Алдыңғы кезеңге оралу</button></div>`;
+  }
+  const idx=state.puzzleActive;
+  const team=state.puzzleTeams[idx];
+  const boardLocked=team.solved||team.revealed;
+  const remaining=shuffled.filter(x=>!team.pick.includes(x));
+  const finished=team.result==='correct'||team.result==='incorrect'||team.revealed;
+  const slots=Array.from({length:8},(_,i)=>{
+    const chosen=team.pick[i];
+    let cls=chosen?'filled':'';
+    if(chosen&&team.result==='incorrect')cls+=chosen===order[i]?' right':' wrong';
+    if(chosen&&team.result==='correct')cls+=' right';
+    const mark=team.result&&chosen?`<span class="mark" aria-hidden="true">${chosen===order[i]?'✓':'✕'}</span>`:'';
+    const label=chosen?esc(chosen):'Бос орын';
+    return `<button class="slot ${cls}" data-action="remove-token" data-index="${i}" ${!chosen||boardLocked?'disabled':''} aria-label="${i+1}-орын: ${label}${team.result==='incorrect'?(chosen===order[i]?' — дұрыс':' — қате'):''}"><b>${String(i+1).padStart(2,'0')}</b><span>${label}</span>${mark}</button>`;
+  }).join('');
+  let notice='';
+  if(team.revealed){
+    notice=`<div class="notice" role="status"><strong>Дұрыс рет:</strong> ${order.map(esc).join(' → ')}. Бұл командаға ұпай берілмейді.</div>`;
+  }else if(team.result==='correct'){
+    notice=`<div class="notice success" role="status">✓ Дұрыс! 8 компоненттің барлығы өз орнында. ${team.points===2?'+2 ұпай есептелді.':'Қайта тексеруде дұрыс табылды, бірақ бірінші талпыныс қате болғандықтан ұпай берілмейді.'}</div>`;
+  }else if(team.result==='incorrect'){
+    const matched=team.pick.filter((v,i)=>v===order[i]).length;
+    notice=`<div class="notice error" role="alert">✕ Реті қате! ${matched}/8 компонент дұрыс орында. <strong>Қызыл түспен</strong> қате орындар, <strong>жасыл түспен</strong> дұрыс орындар белгіленді. Бұл командаға ұпай берілмейді. Қателерді түзетіп қайта тексеруге немесе келесі командаға өтуге болады.</div>`;
+  }
+  const turnButton=finished?`<div class="center-next"><button class="action" data-action="next-puzzle-team">${idx===2?'Үш команданың нәтижесін көру →':`${idx+2}-командаға өту →`}</button></div>`:'';
+  return head+puzzleProgress()+`<div class="round-team-banner"><strong>Қазір ${esc(labels[idx])} тапсырманы орындайды</strong><span>${idx+1}/3 КОМАНДА · ${team.attempts===0?'БІРІНШІ ТАЛПЫНЫС':`${team.attempts} ТЕКСЕРУ ЖАСАЛДЫ`}</span></div>`+
+    `<div class="puzzle-wrap"><div class="puzzle-panel"><h3>Компоненттер · ретімен таңдаңыз</h3><div class="tokens">${remaining.map(x=>`<button class="token" data-action="add-token" data-item="${esc(x)}" ${boardLocked?'disabled':''}>+ ${esc(x)}</button>`).join('')||'<span class="tiny-note">Барлық компонент орналастырылды.</span>'}</div><p class="puzzle-hint">Компонентті төмендегі бос орынға қою үшін атауын басыңыз.</p></div>`+
+    `<div class="puzzle-panel"><h3>Педагогикалық үдерістің құрылымы</h3><div class="slots">${slots}</div><p class="puzzle-hint">Компонентті алып тастау үшін оның орнын басыңыз. Тексергеннен кейін жасыл түс — дұрыс, қызыл түс — қате.</p></div></div>`+
+    `<div class="puzzle-controls"><button class="action secondary" data-action="check-order" ${team.pick.length!==8||boardLocked?'disabled':''}>Реттілікті тексеру</button><button class="action ghost" data-action="clear-order" ${boardLocked||team.pick.length===0?'disabled':''}>Қайта құрастыру</button><button class="action ghost" data-action="reveal-order" ${boardLocked?'disabled':''}>Дұрыс ретті көрсету (0 ұпай)</button></div>`+notice+turnButton+
+    `<div class="stage-actions"><button class="action ghost" data-action="prev">← Алдыңғы кезеңге оралу</button><div class="tiny-note">Келесі командаға өту үшін алдымен реттілікті тексеріңіз немесе дұрыс ретті көрсетіңіз.</div></div>`;
+}
+function three(){return stageHead('03','Түсіндіру','<em>Үш функцияны тап</em>','Оқыту, тәрбиелеу және дамыту бір үдерісте жүзеге асады. Әр команда өз жағдайындағы басым функцияны анықтайды.','5')+caseCards('three')+controls();}
+function four(){return stageHead('04','Сараптау','<em>Шеберлікті анықта</em>','Н. В. Кузьмина ұсынған педагогикалық іс-әрекеттің өнімділік деңгейлерін жағдаят арқылы анықтаңдар.','3')+caseCards('four')+controls({nextLabel:'Нәтижені көру →'});}
+function final(){const high=Math.max(...state.points);const winners=high===0?[]:labels.filter((_,i)=>state.points[i]===high);const standings=labels.map((name,i)=>({name,i,points:state.points[i]})).sort((a,b)=>b.points-a.points);return `<div class="eyebrow">ҚОРЫТЫНДЫ · 2 МИНУТ</div><h2>Миссия <em>аяқталды!</em></h2><p class="lead">Жақсы педагогикалық үдеріс — ақпаратты жеткізу ғана емес. Оның барлық компоненттері бір-бірімен байланысып, студенттің оқуына, тәрбиесіне және дамуына қызмет етуі тиіс.</p><div class="stamp">${winners.length===0?'ӘЗІРГЕ ЖЕҢІМПАЗ ЖОҚ — БАРЛЫҒЫ 0 ҰПАЙ':winners.length===3?'БҮГІН БӘРІҢ ДЕ ЖЕҢІМПАЗСЫҢДАР!':winners.length===1?'ЖЕҢІМПАЗ: '+esc(winners[0]):'ТЕҢ НӘТИЖЕ: '+esc(winners.join(' және '))}</div><div class="conclusion">${standings.map((s,i)=>`<div class="podium ${high>0&&s.points===high?'winner':''}"><div class="rank">${high>0&&s.points===high?'★ ҮЗДІК НӘТИЖЕ':'№ '+(i+1)}</div><div class="name">${esc(s.name)}</div><div class="points">${s.points}</div><div class="muted">ұпай</div></div>`).join('')}</div><div class="takeaway"><strong>Ой түйін:</strong> Педагогикалық үдерістің мақсаты, мазмұны, формасы, құралдары, әдістері, бақылауы мен нәтижесі бір жүйе құрайды. Студент — осы жүйенің белсенді қатысушысы.</div><div class="case" style="margin-top:17px"><strong>Аудиторияға соңғы сұрақ:</strong> Егер оқытушы барлық материалды түсіндірсе, бірақ студенттердің ешқайсысы оны меңгермесе, сабақты нәтижелі деп атауға бола ма? <span class="muted">(30 секундтық пікірталас)</span></div><div class="stage-actions"><button class="action ghost" data-action="prev">← 4-кезеңге оралу</button><div class="right"><button class="action" data-action="restart">Ойынды қайта бастау ↺</button></div></div>`;}
+function render(){scoreBar();progress();renderTimer();const parts=[intro,one,two,three,four,final];$('view').innerHTML=parts[state.step]();}
+function navigate(step){state.step=Math.max(0,Math.min(5,step));state.justRestarted=false;render();window.scrollTo({top:0,behavior:'smooth'});}
+function choose(key,i,option){if(state.checked[key][i])return;state.answers[key][i]=option;render();}
+function check(key,i){if(state.checked[key][i]||state.answers[key][i]===undefined)return;state.checked[key][i]=true;if(state.answers[key][i]===rounds[key][i].right)state.points[i]+=2;render();}
+function puzzleCurrent(){return state.puzzleTeams[state.puzzleActive];}
+function checkOrder(){
+  if(state.puzzleActive>=3)return;
+  const team=puzzleCurrent();
+  if(team.pick.length!==8||team.solved||team.revealed)return;
+  team.attempts+=1;
+  if(order.every((x,i)=>team.pick[i]===x)){
+    team.solved=true;
+    team.result='correct';
+    if(team.attempts===1){team.points=2;state.points[state.puzzleActive]+=2;}
+  }else{team.result='incorrect';}
+  render();
+}
+function act(el){
+  const action=el.dataset.action;
+  const key=el.dataset.key;
+  const i=Number(el.dataset.i);
+  if(action==='next'){
+    if(state.step===2&&state.puzzleActive<3)return;
+    navigate(state.step+1);
+  }else if(action==='prev')navigate(state.step-1);
+  else if(action==='select')choose(key,i,Number(el.dataset.option));
+  else if(action==='check')check(key,i);
+  else if(action==='add-token'){
+    if(state.puzzleActive>=3)return;
+    const team=puzzleCurrent(),value=el.dataset.item;
+    if(team.pick.length<8&&!team.pick.includes(value)&&!team.solved&&!team.revealed){team.pick.push(value);team.result=null;render();}
+  }else if(action==='remove-token'){
+    if(state.puzzleActive>=3)return;
+    const team=puzzleCurrent();
+    if(!team.solved&&!team.revealed){team.pick.splice(Number(el.dataset.index),1);team.result=null;render();}
+  }else if(action==='clear-order'){
+    if(state.puzzleActive>=3)return;
+    const team=puzzleCurrent();
+    if(!team.solved&&!team.revealed){team.pick=[];team.result=null;render();}
+  }else if(action==='check-order')checkOrder();
+  else if(action==='reveal-order'){
+    if(state.puzzleActive>=3)return;
+    const team=puzzleCurrent();
+    if(!team.solved&&!team.revealed){team.revealed=true;team.result=null;team.pick=[...order];render();}
+  }else if(action==='next-puzzle-team'){
+    if(state.puzzleActive>=3)return;
+    const team=puzzleCurrent();
+    if(!(team.result||team.revealed))return;
+    state.puzzleActive++;
+    render();
+    document.getElementById('view').scrollIntoView({behavior:'smooth',block:'start'});
+  }else if(action==='timer'){
+    if(state.seconds===0)return;
+    state.started=true;
+    state.running=!state.running;
+    renderTimer();
+    if(state.step===0)render();
+  }else if(action==='timer-reset'){
+    state.seconds=1200;state.running=false;state.started=false;renderTimer();if(state.step===0)render();
+  }else if(action==='restart'){
+    state=freshState();state.justRestarted=true;render();window.scrollTo({top:0,behavior:'instant'});
+  }
+}
+document.addEventListener('click',event=>{const el=event.target.closest('[data-action]');if(el&&!el.disabled)act(el);});
+window.setInterval(()=>{if(state.running&&state.seconds>0){state.seconds--;if(state.seconds===0){state.running=false;alert('20 минут аяқталды! Қорытындыға көшіңіз.');}renderTimer();}},1000);
+render();
+</script>
+</body>
+</html>
